@@ -1,33 +1,18 @@
-# Example Dockerfile
-FROM ubuntu:22.04
+FROM debian:trixie-slim as builder
 
-# Install dependencies (e.g., MESA and its SDK)
 RUN apt-get update && apt-get install -y \
     build-essential \
-    libreadline-dev \
     curl \
-    git \
-    wget \
+    gfortran \
     unzip \
-    tcsh \
     zlib1g-dev \
     libx11-dev \
-    sudo \
     cmake \
-    vim \
-    gfortran \
-    gcc \
-    libgtest-dev \
+    tcsh \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
-RUN cd /usr/src/gtest/ \
-    && mkdir build \
-    && cd build \
-    && cmake .. \
-    && make \
-    && cp lib/libgtest* /usr/lib/
-
-RUN useradd -m -s /bin/bash mesauser
+RUN useradd -ms /bin/bash mesauser
 USER mesauser
 WORKDIR /home/mesauser
 ENV HOME /home/mesauser
@@ -47,8 +32,41 @@ RUN cd /home/mesauser \
     && /bin/bash -c "source /home/mesauser/mesasdk/bin/mesasdk_init.sh && ./install"
 
 
-COPY runTests.sh /home/mesauser
 
-# Set the entrypoint if necessary
+# Stage 2: Create the final image with just the necessary runtime components
+FROM debian:trixie-slim
+
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    gfortran \
+    unzip \
+    zlib1g-dev \
+    libx11-dev \
+    cmake \
+    tcsh \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -ms /bin/bash mesauser
+USER mesauser
+WORKDIR /home/mesauser
+ENV HOME /home/mesauser
+
+COPY --from=builder /home/mesauser/mesa-r24.03.1/lib /home/mesauser/mesa-r24.03.1/lib
+COPY --from=builder /home/mesauser/mesa-r24.03.1/include /home/mesauser/mesa-r24.03.1/include
+COPY --from=builder /home/mesauser/mesa-r24.03.1/data/kap_data /home/mesauser/mesa-r24.03.1/data/kap_data
+COPY --from=builder /home/mesauser/mesa-r24.03.1/data/chem_data /home/mesauser/mesa-r24.03.1/data/chem_data
+
+COPY --from=builder /home/mesauser/mesasdk /home/mesauser/mesasdk
+
+COPY runTests.sh /home/mesauser
+ENV MESA_DIR=/home/mesauser/mesa-r24.03.1
+ENV MESASDK_ROOT=/home/mesauser/mesasdk
+
+
+
+# Set the entrypoint to your MESA application or test script
 ENTRYPOINT ["./runTests.sh"]
+
 
