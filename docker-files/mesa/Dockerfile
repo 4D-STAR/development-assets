@@ -64,9 +64,6 @@ COPY runTests.sh /home/mesauser
 ENV MESA_DIR=/home/mesauser/mesa-r24.03.1
 ENV MESASDK_ROOT=/home/mesauser/mesasdk
 
-
-
-# Set the entrypoint to your MESA application or test script
 ENTRYPOINT ["./runTests.sh"]
 
 
