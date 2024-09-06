@@ -1,0 +1,1197 @@
+%% Overleaf			
+%% Software Manual and Technical Document Template	
+%% 									
+%% This provides an example of a software manual created in Overleaf.
+
+\documentclass{ol-softwaremanual}
+
+% Packages used in this example
+\usepackage{graphicx}  % for including images
+\usepackage{microtype} % for typographical enhancements
+\usepackage{minted}    % for code listings
+\usepackage{amsmath}   % for equations and mathematics
+\setminted{style=friendly,fontsize=\small}
+\renewcommand{\listoflistingscaption}{List of Code Listings}
+\usepackage{hyperref}  % for hyperlinks
+\usepackage{tcolorbox}
+\usepackage{xcolor}
+\usepackage{fancyvrb} % for "\Verb" macro
+\usepackage[a4paper,top=4.2cm,bottom=4.2cm,left=2.5cm,right=2.5cm]{geometry} % for setting page size and margins
+
+\newtcolorbox{example}[1][]{
+  colback=gray!10,      % Background color
+  colframe=gray!50,     % Border color
+  coltitle=black,       % Title color
+  fonttitle=\bfseries,  % Title font
+  boxrule=0.5mm,        % Border thickness
+  sharp corners=south,  % Rounded corners
+  title=#1,             % Title
+  top=5pt,              % Top padding
+  bottom=5pt,           % Bottom padding
+  left=5pt,             % Left padding
+  right=5pt,            % Right padding
+}
+
+% Define the terminal environment
+\newtcolorbox{terminal}{
+    colback=black,      % Background color
+    coltext=white,      % Text color
+    colframe=black,     % Border color
+    boxrule=0.5mm,      % Border thickness
+    width=\linewidth,   % Box width
+    arc=2mm,            % Rounded corners
+    outer arc=2mm,      % Outer rounded corners
+    fontupper=\ttfamily,% Monospaced font
+    before=\par\vspace{2mm}, % Space before box
+    after=\par\vspace{2mm},  % Space after box
+}
+
+% Custom macros used in this example document
+\newcommand{\doclink}[2]{\href{#1}{#2}\footnote{\url{#1}}}
+\newcommand{\cs}[1]{\texttt{\textbackslash #1}}
+
+% Frontmatter data; appears on title page
+\title{4D-STAR Development Guidelines\\\small{Adapted from Brock University, LAPELS, and NASA Development Standards}}
+\version{0.0.1 (pre-approval)}
+\author{4D-STAR Development Team}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+As a multi-node and multi-developer project 4D-STAR requires a set of consistent
+and robust contribution guidelines. As of the August 2024 ``coding spring'' held
+at the Dartmouth College node a subset of the software development team along
+with three of the four PIs of the project have agreed to propose a development
+and contribution guide. This guide will lay out topics such as code style for
+various languages, issue tracking, pull request review, and git commit
+standards.
+
+Any comments and critiques which the 4D-STAR team has relating to this file are
+welcome and can be incorporated before the adoption of these coding standards.
+Finally, this is and should be a living document. As we learn from the process
+of development we may decide to change or adopt new standard. This document will
+aim to lay out a process for suggesting changes to coding standards.
+
+\section{Standards Summary}
+
+This section provides a brief overview of the key standards highlighted in this
+guide. For more comprehensive details and examples, please refer to the
+relevant sections.
+
+\subsection{Project Tracking}
+\begin{itemize}
+\item Centralized task management using the GitHub Projects board for 4D-ESTER Development.
+\item Add new tasks manually or link existing GitHub issues to the project board.
+\item Use GitHub Issues for managing tasks, tracking bugs, and communicating development progress.
+\item Create issues using the provided template and follow guidelines for managing and commenting on them.
+\end{itemize}
+
+\subsection{Git Considerations}
+\begin{itemize}
+\item Adhere to the branching strategy, including the use of main, feature, bugfix, hotfix, and release branches.
+\item Use Commitizen to create standardized and descriptive commit messages.
+\item Use pre-commit hooks or custom Git hooks to enforce linting and formatting before committing code.
+\item Maintain a .gitignore file to exclude unnecessary files from the repository.
+\item Use GitHub Actions to automate workflows, including CI/CD, linting, and deployment.
+\end{itemize}
+
+\subsection{Code Review}
+\begin{itemize}
+\item All code changes must be reviewed by at least one other developer before being merged into the main branch.
+\item Reviewers should use the provided checklist to evaluate code quality, adherence to standards, test coverage, efficiency, security, and commit history.
+\item Provide clear and constructive feedback in the pull request comments.
+\item Code should only be merged after approval from at least one reviewer.
+\end{itemize}
+
+\subsection{Style Standards}
+\begin{itemize}
+\item Follow the language-specific style guides for C, C++, Fortran, and Python, as outlined in this guide.
+\item Use consistent indentation, naming conventions, and comment styles.
+\item Document your code thoroughly using comments and docstrings.
+\end{itemize}
+
+Please consult the respective sections in this guide for further information and specific examples on each of these standards.
+
+
+\section{Project Tracking}
+In order to limit duplicated work we will make consisent and heavy use of github
+projects. Specifically, the project entitled \texttt{4D-ESTER Development}
+(https://github.com/orgs/4D-STAR/projects/1/) (hereafter "the project") will be the \textbf{centralized
+location for all outstanding tasks related to the development of the 4D version
+of ESTER}. The benefit of this is that development teams across nodes will be able
+to maintain a more consistent sense of the progress which other nodes are making.
+Further, by tracking issues in a centralized location priorities can be more easily compared
+across tasks. 
+
+\subsection{Using the Project}
+The GitHub project board for 4D-ESTER Development is structured to allow for effective task management and collaboration across any node participating in software developmen. The project board currently offers two views:
+
+\begin{itemize}
+\item \textbf{Tasks (Kanban Board):} This view provides a column-based layout where tasks are organized by their status, ranging from "To Do" to "In Progress" and "Done." Each task is represented by a card, which can include details such as the assigned developer, due dates, and a brief description. Developers are expected to:
+\begin{itemize}
+\item Regularly update the status of their tasks by moving the cards across columns as work progresses.
+\item Provide clear and concise descriptions for each task, including relevant links or references to the codebase.
+\item Assign themselves to tasks they are working on and unassign themselves if they are no longer working on a task.
+\item Comment on the task cards to provide updates, request feedback, or report major issues which could block further progress on a task.
+\end{itemize}
+\item \textbf{Timeline:} The timeline view presents tasks in chronological order, showing their start and end dates. The goal of this view is to understand the overall schedule of the project and to help ensure that deadlines are met. Developers should:
+\begin{itemize}
+    \item Ensure that all tasks have realistic start and end dates, which should be updated if project timelines shift.
+    \item Use this view to identify dependencies between tasks and coordinate with others to manage these.
+    \item Review the timeline regularly to make sure that the rate of progress is acceptable.
+\end{itemize}
+This centralized approach to project management will help minimize duplication
+of effort across nodes as well as provide a authoritative source to cite when
+reporting on development progress.
+
+\end{itemize}
+
+\subsubsection{Adding a Task}
+
+To ensure that all development activities are properly tracked, it is important to add tasks to the GitHub Projects board whenever new work is identified. Tasks can be added manually or linked directly to existing GitHub issues. Here's how to do it:
+
+\begin{enumerate}
+\item \textbf{Manual Task Creation:}
+\begin{itemize}
+\item Navigate to the GitHub Projects board and select the "Tasks" view.
+\item Click on the “+ Add a card” button located at the bottom of any column (e.g., "To Do").
+\item A new card will appear. Enter a concise title for the task that clearly describes the work to be done.
+\item Optionally, click on the card to expand it and add more details, such as a description, due date, and assignee.
+\item Once the task is created, move the card to the appropriate column that reflects its current status (e.g., "To Do").
+\end{itemize}
+\item \textbf{Linking a Task to a GitHub Issue:}
+\begin{itemize}
+    \item If the task corresponds to an existing GitHub issue, you can link it directly to the project board for better tracking and integration.
+    \item Start by opening the GitHub issue that you want to link.
+    \item On the right-hand side of the issue page, locate the "Projects" section.
+    \item Click the “+” button next to "Projects" and select the "4D-ESTER Development" project. This will automatically add the issue as a card on the project board.
+    \item The issue card will now appear on the board, and any updates made in the issue (e.g., comments, status changes) will be reflected on the card.
+    \item You can move the card across the columns on the project board just like a manually created task.
+\end{itemize}
+
+\end{enumerate}
+
+Linking tasks to GitHub issues provides additional benefits, such as easier
+tracking of discussions, automated status updates based on issue closures, and
+better integration with the overall development workflow. \textbf{Where possible
+tasks should be linked to GitHub issues.}
+
+\subsection{GitHub Issues}
+
+GitHub Issues are a powerful tool for managing tasks, tracking bugs, and
+coordinating development efforts within the 4D-ESTER project. They can serve as
+a primary means of communication between developers by helping to document work
+that needs to be done, reporting and resolving bugs, and proposing
+enhancements.Issues also provide a historical record of development decisions
+and discussions, making it easier to track progress, revisit previous work,
+and report to funding agencies progress which has been made.
+
+\subsubsection{Creating an Issue}
+Issues on GitHub are linked to a repository. In order to create an issue
+navigate the repository then in the top menu bar select ``Issues'' and then
+select ``New Issue''. This will open the issue creation form. Note that issues
+are a GitHub feature, \textbf{not} a git feature. This means that generally you
+will not be able to track issues using the git command line tools. GitHub does
+provide a command line interface which allows for issue tracking from the
+command line.
+\begin{itemize}
+\item \textbf{Template Usage:} All issues should be created using the standardized issue template provided in the repository. This template includes sections for a clear description, steps to reproduce (if applicable), expected behavior, actual behavior, and any relevant screenshots or logs.
+\item \textbf{Title and Description:} Write a concise and descriptive title for the issue. In the description, provide as much detail as necessary to understand the issue or task, including relevant context, affected code, and references to related issues or pull requests.
+\item \textbf{Labels and Assignees:} Apply appropriate labels (e.g., bug, enhancement, documentation) to categorize the issue. If possible, assign the issue to a developer or a team (such as the Dartmouth-Node team) to ensure it is addressed promptly.
+\item \textbf{Milestones and Projects:} Whenever applicable, associate the issue with a milestone or project to link it to broader development goals. This helps in tracking the progress of larger features or releases.
+\end{itemize}
+
+\subsubsection{Managing Issues}
+
+\begin{itemize}
+\item \textbf{Prioritization:} Review and update the priority of issues regularly to ensure that critical tasks are addressed first. Use the priority labels (low, medium, high) to indicate the urgency of the issue.
+\item \textbf{Communication:} Use the comments section within the issue to provide updates, ask questions, or discuss potential solutions. This ensures that all relevant information is centralized and accessible.
+\item \textbf{Closing Issues:} An issue should only be closed once it has been fully resolved. If the issue is linked to a pull request, it will automatically close when the pull request is merged. Ensure that the resolution is clearly documented in the issue comments before closing.
+\end{itemize}
+
+\subsubsection{Examples of Issues}
+Below are a few examples of what various kinds of issues may look like. Keep in mind that when issues are submitted they should \textbf{always} be based on an existing issue template. If no issue template exists which captures the spirit of the issue being submitted then that should likely not be an issue (perhaps it is either too general or too specific?). If you believe it should be and no issue template exists then create an issue template following the format laid out in the 4D-Star/development-assets repository.
+
+\begin{example}[Bug Report Issue]
+\textbf{Title}: Application crashes when opening large opacity tables
+\\
+\textbf{Description}:
+ESTER crashes when attempting to open opacity tables larger than 1GB. This
+issue was observed on both Linux and macOS environments, and it appears to be
+related to memory handling during the file loading process.
+\\
+\textbf{Steps to Reproduce}:
+\begin{enumerate}
+    \item Attempt to evolve a 1d model using an opacity table larger than 1GB (attached/linked).
+    \item Observe ESTER crashing without an error message.
+\end{enumerate}
+\textbf{Expected Behavior}:
+ESTER should handle large opacity tables gracefully, either by loading the file
+without crashing or by displaying an appropriate error message if the file size
+exceeds the ESTERS capabilities or some user configured max size.
+\\
+\textbf{Actual Behavior:}
+ESTER crashes immediately upon attempting to open a large opacity table.
+
+\textbf{Screenshots/Logs:}
+\textit{(Attach any relevant screenshots, logs, or datafiles here.)}
+
+\textbf{Environment}:
+\begin{itemize}
+    \item OS: macOS 13.3, Ubuntu 22.04
+    \item Version: 4D-ESTER v0.0.1a
+    \item SDK Version: 4D-ESTER SDK v0.0.3a
+    \item Memory: 16GB RAM
+\end{itemize}
+\textbf{Labels}:
+\textit{bug}, \textit{high priority}
+
+\textbf{Assignee(s):}
+\begin{itemize}
+    \item John Doe
+\end{itemize}
+
+\end{example}
+\begin{example}[Feature Request Issue]
+    \textbf{Title}: Add support for saving ESTER models as csv
+    
+    \textbf{Description}:
+    csv files are generally easier for community members to quickly use. While the h5 file format maintains a high degree of flexibility it would be useful to also be able to export evolutionary tracks as csv files to allow for easier community engagement.
+    
+    \textbf{Use Case}:
+    \begin{itemize}
+        \item non computer focused astronomers use of ESTER
+        \item class / student use of ESTER
+    \end{itemize}
+    \textbf{Potential Risks}:
+    CSV files will, for the same amount of underlying data, tend to be larger as all information has to be encoded via text. Further, many of the memory streaming benefits and hierarchical benefits of h5 are lost. This is acceptable as I do not propose to remove h5 output, simply to supplement it for community members who are not comfortable interfacing with h5 files.
+    
+    \textbf{Labels}:
+    \textit{enhancment}, \textit{low priority}
+    
+    \textbf{Assignee(s):}
+    \begin{itemize}
+        \item Jane Doe
+    \end{itemize}
+\end{example}
+
+\begin{example}[Pull Request]
+    \textbf{Title}: Refactor memory management in the opacity table loading function
+    
+    \textbf{Description}:
+    This pull request refactors the memory management in the opacity table loading function to address issues with handling large opacity tables. The changes improve stability and prevent crashes when loading tables over 1GB in size.
+    
+    \textbf{Linked Issues}:
+        \begin{itemize}
+        \item Fixes \#23: Application crashes when opening large opacity tables
+        \end{itemize}
+    \textbf{Changes Made}:
+    \begin{itemize}
+        \item Introduced a buffer system to handle large files in smaller chunks.
+        Updated error handling to provide feedback if a file is too large to load.
+        \item Added unit tests to verify the changes.
+    \end{itemize}
+    \textbf{Testing}:
+    \begin{itemize}
+        \item Successfully tested loading opacity tables of various sizes, including those larger than 1GB.
+        \item Passed all existing unit tests.
+        \item Ran performance benchmarks to ensure no significant impact on opacity loading.
+    \end{itemize}
+    \textbf{Labels}: \textit{refactor}, \textit{high priority}
+    
+    \textbf{Reviewer}:
+    Open for review by any team member
+\end{example}
+
+\subsubsection{Commenting On Issues}
+Commenting on GitHub Issues is essential to issues being a useful tool. Comments provide a way to discuss the issue, clarify details, and track progress. Some guidelines to ensure comments are clear, constructive, and contribute positively to the project follow:
+\begin{enumerate}
+\item Why You Should Comment
+\begin{itemize}
+    \item \textbf{Clarify Details}: If you have questions about the issue or need further clarification, leaving a comment is the best way to get the information you need.
+    \item \textbf{Provide Updates}: Use comments to update the development-team on your progress, any challenges you encounter, or if you've resolved the issue. Comments on issues are easier to trace and conglomerate than slack direct-messages.
+    \item \textbf{Suggest Solutions}: If you have a potential solution or workaround, share it in the comments. This can both help the issue be resolved and also provide a ledger of solutions that have been tried in the past.
+    \item \textbf{Request Feedback}: If you need feedback on an approach or decision, a comment can initiate that discussion.
+    \item \textbf{Acknowledge Contributions}: Use comments to acknowledge other team members' suggestions or contributions.
+\end{itemize}
+\item How to Reference Other Issues
+\begin{itemize}
+    \item \textbf{Linking to Issues}: When referencing another issue, always use the \# followed by the issue number (e.g., \#123). This automatically creates a hyperlink to the referenced issue, making it easy for others to navigate between related discussions.
+    \item \textbf{Describing Relationships}: If the issue you’re referencing is closely related or dependent on the current issue, describe the relationship in your comment. For example, "This issue is related to \#456, where we discussed a similar problem with the spectral methods."
+    \item \textbf{Cross-Referencing}: If your comment is relevant to multiple issues, cross-reference them by listing all applicable issue numbers (e.g., "This solution also addresses concerns raised in \#789 and \#1011").
+\end{itemize}
+\item How Comments Should Be Written
+\begin{itemize}
+    \item \textbf{Be Clear and Concise}: Keep your comments focused and to the point. Use bullet points or numbered lists if you're covering multiple points.
+    \item \textbf{Use Proper Grammar and Spelling}: Write comments with the same care you would give to any other part of your work. 
+    \item \textbf{Stay Professional and Respectful}: Always maintain a professional tone, and be respectful of others’ ideas and contributions. Constructive feedback is encouraged, but it should be given in a way that is supportive and helpful.
+    \item \textbf{Format Code and Links}: If you need to include code snippets in your comments, use backticks for inline code or triple backticks followed by the name of the language for blocks of code. For example \Verb#``This is inline code``#.
+    \item \textbf{Summarize Long Discussions}: If a comment thread becomes long or complex, periodically summarize key points or decisions to keep the conversation on track and make it easier for others to catch up.
+\end{itemize}
+\item Best Practices
+\begin{itemize}
+    \item \textbf{Comment Frequently}: Regular comments help keep the development-team informed and engaged. Even if it’s a simple update, it’s worth sharing.
+    \item \textbf{Use Mentions Sparingly}: Use @username mentions to notify specific team members when their input is needed, but avoid overusing mentions as it can lead to notification fatigue.
+    \item \textbf{Keep the Conversation on Topic}: Ensure that your comments are relevant to the issue at hand. If a discussion veers off-topic, consider opening a new issue or starting a conversation in another appropriate channel.
+    \item \textbf{Resolve Conflicts}: If there’s a disagreement in the comments, aim to resolve it constructively. Acknowledge different viewpoints and work towards a consensus or a compromise.
+    \item \textbf{Document Decisions}: If a decision is made as a result of a comment thread, summarize it clearly in the comments and consider updating the issue description or linked documentation to reflect that decision.
+\end{itemize}
+\end{enumerate}
+
+\section{Other Git Considerations}
+In addition to making use of GitHub Projects and Issues, as a development team we must follow consistent and standardized rules for using Git at large. This section lays out the guidelines for branches, commits, .gitignore files, and GitHub Actions.
+\subsection{Branches}
+To maintain a clean and organized codebase, we follow a structured branching strategy:
+\begin{itemize}
+    \item \textbf{Main Branch (main)}: This branch should always contain stable, production-ready code. Direct commits to the main branch are prohibited; all changes must be introduced through pull requests.
+    \item \textbf{Feature Branches (feature/)}: Use feature branches for developing new features or significant changes. Name the branch descriptively, prefixed with feature/ (e.g., feature/add-csv-export).
+    \item \textbf{Bugfix Branches (bugfix/)}: For fixing bug, use branches prefixed with bugfix/. Ensure the branch name clearly indicates the nature of the bug (e.g., bugfix/fix-crash-large-files).
+    \item \textbf{Hotfix Branches (hotfix/)}: For urgent fixes to production code, use hotfix/ branches (e.g., hotfix/security-patch).
+    \item \textbf{Release Branches (release/)}: When preparing for a new release, create a release/ branch to finalize features, bug fixes, and documentation for that release (e.g., release/v1.0.0).
+    \item \textbf{Naming Conventions}: Always use lowercase with hyphens (-) to separate words. Avoid using spaces or underscores.
+\end{itemize}
+\subsubsection{Branching Workflow:}
+\begin{enumerate}
+\item Create a Branch: Before starting new work, create a branch from main.
+\begin{terminal}
+\begin{minted}{bash}
+$ git checkout -b bugfix/opal-null-pointer
+$ git add src/opal/load
+$ cz c
+$ git push -u origin bugfix/opal-null-pointer
+\end{minted}
+\vspace{1mm}
+\vspace{1mm}
+  {\color{green} \textbf{N.B}: You may notice in the above example use of \Verb#cz c# instead of \Verb#git commit -m ...# See Section \ref{sec:commits} for more details on what this is and why we use commitizen (which brings the cz command) instead of raw git commits.}
+\end{terminal}
+\item Work on the Branch: Commit your changes to the branch as you develop.
+Push the Branch: Once your work is ready, push the branch to the remote repository.
+\begin{terminal}
+\begin{minted}{bash}
+$ git push origin feature/your-feature-name
+\end{minted}
+\end{terminal}
+\item Submit a Pull Request: After pushing, submit a pull request to merge your branch into main.
+\end{enumerate}
+\subsubsection{Checking Out Branches}
+Checking out a remote branch will be a task that is somewhat common. Below is a breif example of how one might do this if there is a branch on the 4D-ester repository called feature/add-mesa-rates
+\begin{terminal}
+\begin{minted}{bash}
+git fetch origin
+git checkout -b feature/add-mesa-rates origin/feature/add-mesa-rates
+\end{minted}
+\end{terminal}
+\subsection{Commits}\label{sec:commits}
+Commits should be atomic and descriptive, with each commit representing a single logical change. This means that when commiting a change add only the files related to that commit message. If you have changed multiple, parts of the code base since your last commit this should result in multiple commits instead of one large commit. It is important that we avoid commit messages of the form "Bug Fix" or "Made Changes". We use Commitizen to enforce a standardized format for commit messages, which enhances readability and consistency.
+
+\subsubsection{Commit Process}
+\begin{enumerate}
+\item \textbf{Install Commitizen}: Ensure Commitizen is installed in your project. If it is not already installed it can be installed using the node package manager. 
+\begin{terminal}
+\begin{minted}{bash}
+$ npm install -g commitizen
+\end{minted}
+\end{terminal}
+\item \textbf{Add and Commit Changes}: Instead of using git commit, use cz to commit your changes.
+\begin{terminal}
+\begin{minted}{bash}
+$ git add <path/to/file/a> <path/to/file/b> ...
+$ cz c
+\end{minted}
+\end{terminal}
+\item \textbf{Commitizen Prompts}: Commitizen will prompt you to provide details for the commit message, such as type, scope, and a brief description. Below is a quick example of what walking through these prompts might look like
+\begin{terminal}
+\Verb#? Select the type of change you are committing#
+\Verb#   fix: A bug fix. Correlates with PATCH in SemVer#
+{\color{orange}\Verb# » feat: A new feature. Correlates with MINOR in SemVer#}
+\Verb#   docs: Documentation only changes#
+\Verb#   style: Changes that don't affect the meaning of the code#
+\Verb#   refactor: Neither fixing a bug nor adding a feature#
+\Verb#   perf: A code change that improves performance#
+\Verb#   test: Adding missing or correcting existing tests#
+\Verb#   build: Build system or external dependencies changes#
+\Verb#   ci: Changes to CI configuration files and scripts#
+\end{terminal}
+\begin{terminal}
+\texttt{{\color{orange} ?} Select the type of change you are committing {\color{orange}feat: A new feature. Correlates with MINOR in SemVer}}\\
+\texttt{{\color{orange}?} What is the scope of this change? (class or file name): (press [enter] to skip)}\\
+\texttt{\color{orange} \ neu/calc.c}
+\end{terminal}
+\begin{terminal}
+\texttt{{\color{orange}?} Select the type of change you are committing {\color{orange}feat: A new feature. Correlates with MINOR in SemVer}}\\
+\texttt{{\color{orange}?} What is the scope of this change? (class or file name): (press [enter] to skip)}\\
+\texttt{ \color{orange}\ neu/calc.c}\\
+\texttt{{\color{orange}?} Write a short and imperative summary of the code changes: (lower case and no period)}\\
+\texttt{ \color{orange}\ fixed log / ln error}
+\end{terminal}
+\begin{terminal}
+\texttt{{\color{orange}?} Select the type of change you are committing {\color{orange}feat: A new feature. Correlates with MINOR in SemVer}}\\
+\texttt{{\color{orange}?} What is the scope of this change? (class or file name): (press [enter] to skip)}\\
+\texttt{ \color{orange}\ neu/calc.c}\\
+\texttt{{\color{orange}?} Write a short and imperative summary of the code changes: (lower case and no period)}\\
+\texttt{ \color{orange}\ fixed log / ln error} \\
+\texttt{{\color{orange}?} Provide additional contextual information about the code changes: (press [enter] to skip)} \\
+\texttt{\color{orange} \ In neu/calc.c in the calc\_rates function the log base 10 of the density was being used. However, the tabulated data is a function of natural log of density. This was causing the interpolation routine to go outside of the bounds of the table.}
+\end{terminal}
+\begin{terminal}
+\texttt{{\color{orange}?} Select the type of change you are committing {\color{orange}feat: A new feature. Correlates with MINOR in SemVer}}\\
+\texttt{{\color{orange}?} What is the scope of this change? (class or file name): (press [enter] to skip)}\\
+\texttt{ \color{orange}\ neu/calc.c}\\
+\texttt{{\color{orange}?} Write a short and imperative summary of the code changes: (lower case and no period)}\\
+\texttt{ \color{orange}\ fixed log / ln error} \\
+\texttt{{\color{orange}?} Provide additional contextual information about the code changes: (press [enter] to skip)} \\
+\texttt{\color{orange} \ In neu/calc.c in the calc\_rates function the log base 10 of the density was being used. However, the tabulated data is a function of natural log of density. This was causing the interpolation routine to go outside of the bounds of the table.} \\
+\texttt{{\color{orange}?} Is this a BREAKING CHANGE? Correlates with MAJOR in SemVer {\color{orange}No}}
+\end{terminal}
+\begin{terminal}
+\texttt{{\color{orange}?} Select the type of change you are committing {\color{orange}feat: A new feature. Correlates with MINOR in SemVer}}\\
+\texttt{{\color{orange}?} What is the scope of this change? (class or file name): (press [enter] to skip)}\\
+\texttt{ \color{orange}\ neu/calc.c}\\
+\texttt{{\color{orange}?} Write a short and imperative summary of the code changes: (lower case and no period)}\\
+\texttt{ \color{orange}\ fixed log / ln error} \\
+\texttt{{\color{orange}?} Provide additional contextual information about the code changes: (press [enter] to skip)} \\
+\texttt{\color{orange} \ In neu/calc.c in the calc\_rates function the log base 10 of the density was being used. However, the tabulated data is a function of natural log of density. This was causing the interpolation routine to go outside of the bounds of the table.} \\
+\texttt{{\color{orange}?} Is this a BREAKING CHANGE? Correlates with MAJOR in SemVer {\color{orange}No}}\\
+\texttt{\color{cyan}fix(neu/calc.c): fixed log / ln error}\\
+
+\texttt{\color{cyan}In neu/calc.c in the calc\_rates function the log base 10 of the density was being used. However, the tabulated data is a function of nautral log of density. This was causing the interpolation routine to go outside of the bounds of the table.}\\ \\
+
+
+\texttt{[dev 1714e72] fix(neu/calc.c): fixed log / ln error}\\
+\texttt{ 1 file changed, 1 insertion(+), 2 deletions(-)} \\
+
+\texttt{\color{green}Commit successful!}
+\end{terminal}
+\item \textbf{Pre-commit Hooks}: Linting and Formatting: To maintain code quality, set up Git hooks to run linters automatically before each commit. This can be done using pre-commit
+\begin{itemize}
+\item First, if not already installed, install pre-commit. This can be done with the python package manager
+\begin{terminal}
+\begin{minted}{bash}
+$ pip install pre-commit
+\end{minted}
+\end{terminal}
+\item Now we need to tell pre-commit what to to (hooks) before each commit. This is done by adding a .pre-commit-hooks.yaml file to the root of your git repo. in developer-assets there are premade .pre-commit-hooks.yaml files for various languages (C, C++, Fortran, and Python). There is also a unified .pre-commit-hooks.yaml file. In general all you should have to do is copy the unified .pre-commit-hooks.yaml file to your repository. The structure of these files looks like
+
+\begin{minted}{yaml}
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.3.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v13.0.0
+    hooks:
+      - id: clang-format
+        args: [--style=file]
+
+  - repo: https://github.com/pycqa/flake8
+    rev: v4.0.1
+    hooks:
+      - id: flake8
+        additional_dependencies: [flake8]
+
+  - repo: local
+    hooks:
+      - id: run-make
+        name: Run Makefile
+        entry: make
+        language: system
+        files: \.(c|cpp|h|f|f90)$
+        stages: [commit]
+
+\end{minted}
+\end{itemize}
+\item This configuration does the following:
+\begin{itemize}
+    \item \textbf{Trailing Whitespace, End-of-File Fixer, Check YAML}: Basic hooks to clean up common formatting issues.
+    \item \textbf{Clang-Format}: Formats C/C++ code according to the style specified in a .clang-format file.
+    \item \textbf{Flake8}: Lints Python code.
+    \item {Run Make}: Runs the Makefile to ensure the build is successful before allowing a commit.
+\end{itemize}
+\item \textbf{Install the Git Hooks}:
+Run the following command to install the hooks defined in your .pre-commit-config.yaml file
+\begin{terminal}
+\begin{minted}{bash}
+$ pre-commit install
+\end{minted}
+\end{terminal}
+\item \textbf{Running the Hooks}:
+The hooks will now automatically run every time you attempt to commit code. If any issues are found, the commit will be blocked until they are resolved.
+\item \textbf{Manually Running Hooks}:
+You can also run the hooks manually on all files:
+\begin{terminal}
+\begin{minted}{bash}
+$ pre-commit run --all-files
+\end{minted}
+\end{terminal}
+\subsubsection{Custom Git Hooks}
+Alternatively, you can write your own custom Git hooks directly in the .git/hooks/ directory:
+\begin{itemize}
+    \item \textbf{Create a Hook Script}:
+    Create a script in the .git/hooks/ directory, such as pre-commit, and make it executable:
+\begin{example}[Custom git hook]
+\begin{minted}{bash}
+#!/bin/sh
+make
+clang-format -i *.c *.cpp *.h *.f *.f90
+flake8 .
+\end{minted}
+\end{example}
+
+\item \textbf{Make the Script Executable}:
+\begin{terminal}
+\begin{minted}{bash}
+$ chmod +x .git/hooks/pre-commit
+\end{minted}
+\end{terminal}
+
+\item \textbf{Automate Linting and Testing}:
+The script can include commands to run linters (like clang-format for C/C++ or flake8 for Python) and tests. If any of these steps fail, the commit will be blocked.
+\end{itemize}
+\item \textbf{Running Tests}: Ensure that all tests pass before committing.
+\end{enumerate}
+\subsection{.gitignore}
+The .gitignore file is essential for keeping unnecessary files out of the repository. It specifies which files and directories Git should ignore.
+
+\subsubsection{Best Practices for .gitignore}
+\begin{itemize}
+    \item \textbf{Ignore System Files}: Files generated by your operating system, such as .DS\_Store (macOS) or Thumbs.db (Windows).
+    \item \textbf{Ignore Build Artifacts}: Compiled files, object files, and other build artifacts should be excluded (e.g., *.o, *.exe, build/).
+    \item \textbf{Ignore Dependencies}: If your project includes external dependencies, such as Python’s \_\_pycache\_\_/, Node.js’s node\_modules/, or compiled binaries, ensure these are ignored.
+    \item \textbf{Ignore Environment Configs}: Local environment configuration files like .env or secrets.json should be excluded from version control.
+    Sample .gitignore for a C/C++/Python/Fortran Project:
+\end{itemize}
+\begin{example}[Example .gitignore File]
+\begin{minted}{text}
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# C/C++
+*.o
+*.exe
+build/
+cmake-build-debug/
+
+# Fortran
+*.mod
+*.out
+*.lst
+
+# Logs c.log
+
+# Temporary files
+*.tmp
+*.swp
+\end{minted}
+\end{example}
+\subsection{Actions}
+GitHub Actions provide automated workflows that can be triggered by events in your repository, such as pushing code, opening pull requests, or scheduling regular tasks. These workflows ensure that testing standards laid out in this document are automatically applied to all development work.
+
+\subsubsection{Setting Up GitHub Actions}
+\begin{itemize}
+    \item \textbf{Creating a Workflow File}: Workflow files are stored in the .github/workflows/ directory of your repository. Each file defines a set of jobs and steps to be executed when triggered. Example Workflow for CI/CD:
+\begin{example}[Example Workflow for CI/CD]
+\begin{minted}{yaml}
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run linting
+        run: |
+          flake8 .
+      
+      - name: Run tests
+        run: |
+          pytest
+\end{minted}
+\end{example}
+\item \textbf{Linting and Formatting}: Use GitHub Actions to automatically lint and format your code on each push or pull request.
+\item \textbf{Continuous Integration (CI)}: Set up workflows that automatically run tests whenever code is pushed or a pull request is created. This ensures that the codebase remains stable and functional.
+\item \textbf{Deployment}: Automate deployment to production or staging environments using GitHub Actions. This can include building Docker images, uploading assets to a cloud service, or triggering a deployment script.
+\end{itemize}
+
+\subsubsection{Best Practices for Actions}
+\begin{itemize}
+    \item \textbf{Modularize Workflows}: Break down complex workflows into smaller, reusable components. Use reusable workflows or composite actions to manage common tasks.
+    \item \textbf{Secure Secrets}: Store sensitive information such as API keys or passwords in GitHub Secrets, and reference them securely in your workflows.
+    \item \textbf{Monitor Workflow Runs}: Regularly monitor the outcomes of your workflows. Set up notifications for failed runs to ensure prompt action.
+\end{itemize}
+\section{Code Review}
+Code review is a critical component of the development workflow, ensuring that code quality remains high, best practices are followed, and knowledge is shared across the team. This section outlines the standards and procedures for conducting code reviews within the 4D-ESTER project. Generally what this means is that \textbf{no development should take place on any main branches; rather, development should take place in development branches}.
+\subsection{Purpose of Code Review}
+\begin{itemize}
+
+    \item \textbf{Ensure Code Quality}: Code reviews help catch bugs, performance issues, and other potential problems before code is merged into the main branch.
+    \item \textbf{Enforce Coding Standards}: Reviews ensure that all code adheres to the coding standards laid out in this document, maintaining consistency across the codebase.
+    \item \textbf{Knowledge Sharing}: Code reviews are an opportunity for those at different nodes to learn from each other, share best practices, and improve their own coding skills.
+\end{itemize}
+\subsection{Standards for Code Review}
+\begin{itemize}
+    \item \textbf{Adherence to Coding Guidelines}: Ensure that the code follows the coding standards outlined in this document, including naming conventions, code structure, and documentation.
+    \item \textbf{Test Coverage}: Verify that the code is adequately tested. All new features or bug fixes must be accompanied by appropriate unit tests, and all tests should pass on the Continuous Integration (CI) system.
+    \item \textbf{Code Efficiency}: Review the code for efficiency in terms of performance and resource usage. Ensure that the code does not introduce unnecessary complexity or slowdowns.
+    \item \textbf{Readability and Maintainability}: The code should be easy to understand and maintain. Check for clear naming, proper use of comments, and adherence to the DRY (Don’t Repeat Yourself) principle.
+    \item \textbf{Error Traceability} Ensure that the newly introduced code handles errors gracefully and in a manner which is interoperable with the overall error handling strategy of 4D-ESTER.
+    \item \textbf{Compliance with Commit Standards}: Ensure that commit messages follow the standard format enforced by Commitizen, and that the commits are logical and well-organized.
+\end{itemize}
+\subsection{How Code Review Will Work}
+\begin{itemize}
+    \item \textbf{Assigning a Reviewer}: When a developer submits a pull request (PR), any other team member can pick it up for review. The reviewer should not be the same person who wrote the code. The developer may use slack to notify the development-team that a pull request has been submitted.
+    \item \textbf{Review Checklist}: Reviewers should use the following checklist to guide their review:
+    \begin{itemize}
+        \item Is the code functional and free of obvious bugs?
+        \item Does the code adhere to 4D-STAR's coding standards?
+        \item Are all new features or fixes adequately tested?
+        \item Is the code efficient and maintainable?
+        \item Are security best practices followed?
+        \item Is the commit history clean and well-organized?
+    \end{itemize}
+    There is a template in developer-assets which should be used by code reviewers as a base and includes a checklist of items which a pull request must pass in order to be merged.
+    \item \textbf{Providing Feedback}: Reviewers should provide clear, constructive feedback in the PR comments. Highlight both positive aspects of the code and areas that need improvement. If significant changes are required, the reviewer should clearly explain why and suggest alternatives.
+    \item \textbf{Approval and Merging}: Once the reviewer is satisfied that the code meets all standards, they can approve the PR. The code should only be merged into the main branch after it has been approved by at least one reviewer. If there are multiple significant changes requested, a re-review should be conducted after revisions are made.
+    \item \textbf{Rejecting a PR}: If the code has significant issues that cannot be resolved within the scope of the current PR, the reviewer may reject the PR with a detailed explanation. The developer can then revise the code and submit a new PR.
+    \item \textbf{Reviewing in a Timely Manner}: Reviews should be conducted promptly to avoid bottlenecks in the development process. Reviewers should aim to provide initial feedback within one week of the PR being submitted.
+\end{itemize}
+\subsection{Best Practices for Code Review}
+\begin{itemize}
+    \item \textbf{Be Respectful and Constructive}: Approach the review process as a collaborative effort. Always be respectful in your feedback.
+    \item \textbf{Focus on the Code, Not the Developer}: Reviews should be about the code, not the person who wrote it. Keep your comments objective and focused on the specific issues or improvements.
+    \item \textbf{Keep the Scope in Mind}: Review the code within the context of the task it was intended to solve. Avoid getting sidetracked by unrelated issues.
+    \item \textbf{Use the Pull Request Template}: Ensure that the PR template (if available) is fully filled out. This includes providing a clear description, linking to relevant issues, and detailing the changes made.
+    \item \textbf{Continuous Improvement}: Use the review process to identify patterns or recurring issues in the codebase. If the same issues keep coming up, consider updating the this document to address these issues.
+\end{itemize}
+\subsection{Post-Review Process}
+\begin{itemize}
+    \item \textbf{Merging the Code}: Once the code has been reviewed and approved, it can be merged into the main branch. Ensure that all automated tests pass on the CI system before merging.
+    \item \textbf{Documentation}: If the code introduces new features or changes existing functionality, ensure that relevant documentation is updated accordingly.
+    \item \textbf{Retrospective}: Periodically review the code review process
+    itself to identify areas for improvement. 
+\end{itemize}
+
+\section{Style Standards}
+Consistent code style is essential for maintaining a readable and maintainable codebase, especially in a multi-developer, multi-language project like 4D-ESTER. This section outlines the style standards for each of the languages used in our project: C, C++, Fortran, and Python. Adherence to these standards will ensure that our code remains consistent, understandable, and easy to review.
+\subsection{General Style Standards}
+\begin{itemize}
+    \item Comment code in a way which describes why something is being done not what is being done
+    \item Include docstrings on all functions, classes, subroutines, modules, structs, etc...
+    \item docstrings should \textbf{all} be doxygen compliant.
+    \item Use double precision floating point numbers (double in c, real*8 in fortran, and the default float type in python)
+    \item Document code as you write it
+    \item Do not use tabs
+    \item Use reasonable and descriptive variable names. You should be able to tell what a variable is by reading its name.
+    \item As much as possible try to limit all lines to a maximum of 80 characters.
+    \item \textbf{Version Control}:
+        Commit often, with clear, descriptive messages. Follow the commit message conventions outlined in the "Commits" section.
+        Use branches to develop features or fix bugs, and always submit changes through pull requests.
+
+    \item \textbf{Documentation}:
+        Document your code comprehensively using comments and docstrings. All docstrings should be copatible with doxygen so that we can maintain a unified API reference. Maintain an up-to-date README.md and other relevant documentation files in the project root.
+
+    \item \textbf{Security}:
+        While security may not be at the forefront of our minds as astronomer's we should be aware that there has been conversation about web interfaces to ESTER and the final programs produced by 4D-STAR. We do not need to overly focus on code security; however, we do need to be aware, at least at a low level, of security concerns such as validating input files, and proper memory management.
+
+    \item \textbf{Profiling}:
+        Profile code for performance and memory usage regularly or as part of CI/CD so that we have a trace of where improvements may be made. Contribute profiles to the profiling database when that is operational.
+\end{itemize}
+\subsection{C Style Standards}
+\begin{itemize}
+    \item \textbf{Indentation}: Use 4 spaces per indentation level. Do not use tabs.
+
+    \item \textbf{Braces}: Use the K\&R style for braces (\href{https://en.wikipedia.org/wiki/Indentation_style}{brace styles}):
+\begin{example}[Braces Example]
+\begin{minted}{c}
+if (condition) {
+    // Code
+}
+else {
+    // Code
+}
+\end{minted}
+\end{example}
+\item \textbf{Naming Conventions}:
+\begin{itemize}
+    \item \textit{Variables}: Use snake\_case for variable names (e.g., total\_count).
+    \item \textit{Functions}: Use snake\_case for function names (e.g., calculate\_sum).
+    \item \textit{Constants}: Use UPPER\_CASE with underscores for constants (e.g., MAX\_BUFFER\_SIZE).
+    \item \textit{Global Variables}: Prefix with g\_ to indicate they are global (e.g., g\_error\_code).
+\end{itemize}
+\item \textbf{Comments}:
+
+    Use /* ... */ for block comments and // for single-line comments.
+    Place comments above the code they refer to, and use them to explain why something is being done, not just what is being done.
+\begin{example}[Single Line Comments]
+\begin{minted}{c}
+// Initialize the counter
+int counter = 0;
+\end{minted}
+\end{example}
+\item \textbf{Docstrings}:
+Doxygen-style comments are used to generate documentation from annotated source code. These comments provide descriptions for functions, classes, parameters, return values, and other relevant information. Place the Doxygen comments directly above the code they refer to. Docstrings should be given in the header file and not in the implimentation file.
+\begin{example}[Docstrings]
+\begin{minted}{c}
+/**
+ * @brief Adds two integers.
+ *
+ * This function takes two integers and returns their sum.
+ *
+ * @param a The first integer.
+ * @param b The second integer.
+ * @return The sum of a and b.
+ */
+int add(int a, int b) {
+    return a + b;
+}
+\end{minted}
+\end{example}
+\item \textbf{Functions}: Functions should have a single responsibility and be kept short. Function prototypes should be declared in header files (.h). Always check return values, especially for functions that might fail (e.g., malloc).
+
+\item \textbf{Header Files}: Use include guards to prevent multiple inclusions. Guards should use the format FILENAME\_H (all caps)
+\begin{example}[Include Guards]
+\begin{minted}{c}
+#ifndef MY_HEADER_H
+#define MY_HEADER_H
+
+// Declarations
+
+#endif // MY_HEADER_H
+\end{minted}
+\end{example}
+
+\item \textbf{Pointer Usage}: Place the asterisk next to the variable name (not the type deceleration) in pointer declarations
+\begin{example}[Pointer Decleration]
+\begin{minted}{c}
+int *ptr;
+\end{minted}
+\end{example}
+\item \textbf{File Organization}: Each source file should have an associated header file. Implementation goes in .c files, and declarations go in .h files. Implementation and declaration files should have the same file name aside from the extension.
+\end{itemize}
+\subsection{C++ Style Standards}
+Many Of the C++ style standards will be the same as the C style standards.
+\begin{itemize}
+\item \textbf{Indentation}: Use 4 spaces per indentation level. Avoid using tabs.
+\item \textbf{Braces}: Use the K\&R style for braces, similar to C:
+\item \textbf{Naming Conventions}:
+\begin{itemize}
+    \item \textit{Variables}: Use camelCase for variable names (e.g., totalCount).
+    \item \textit{Functions}: Use camelCase for function names (e.g., calculateSum).
+    \item \textit{Classes}: Use PascalCase for class names (e.g., DataProcessor).
+    \item \textit{Constants}: Use UPPER\_CASE with underscores for constants (e.g., MAX\_BUFFER\_SIZE).
+    \item \textit{Member Variables}: Prefix with m\_ (e.g., m\_bufferSize).
+\end{itemize}
+\item \textbf{Comments}:
+        Use // for single-line comments and /* ... */ for multi-line comments.
+        Document all public classes and methods with Doxygen-compatible comments. See C style reference for Doxygen-compatible format.
+
+\item \textbf{Classes}:
+\begin{itemize}
+        \item \textit{Encapsulation}: Keep data members private, provide access through getter and setter methods.
+        \item \textit{Constructors and Destructors}: Always define a default constructor and destructor. Use member initialization lists where possible.
+        \item \textit{Inheritance}: Prefer composition over inheritance. Use virtual only when necessary, and mark overridden methods with override.
+\end{itemize}
+\item \textbf{Functions}:
+        Functions should be small and perform a single task.
+        Prefer using references over pointers when passing objects to functions.
+        Mark functions as const if they do not modify the object’s state.
+
+\item \textbf{Header Files}:
+        Use include guards or \#pragma once to prevent multiple inclusions.
+        Place class declarations in header files (.h) and implementations in source files (.cpp).
+
+\item \textbf{Templates}:
+        Template definitions should be placed in header files.
+        Use templates judiciously to avoid code bloat.
+
+\item \textbf{STL and Modern C++}:
+        Prefer the use of STL containers (std::vector, std::map) over raw arrays and custom data structures. Use modern C++ features like auto, range-based for loops, and smart pointers (std::unique\_ptr, std::shared\_ptr) to manage resources.
+\end{itemize}
+\subsection{Fortran Style Standards}
+\begin{itemize}
+\item \textbf{Indentation}:
+        Use 2 spaces per indentation level. Avoid using tabs.
+
+\item \textbf{Naming Conventions}:
+\begin{itemize}
+        \item \textit{Variables}: Use camelCase for variable names (e.g., totalCount).
+        \item \textit{Subroutines and Functions}: Use camelCase for subroutine and function names (e.g., calculateSum).
+        \item \textit{Modules}: Use PascalCase for module names (e.g., DataProcessing).
+        \item \textit{Constants}: Use UPPER\_CASE for constants (e.g., MAX\_BUFFER\_SIZE).
+\end{itemize}
+    \item \textbf{Comments}:
+        Use ! for comments. Place comments on a separate line above the code they describe.
+
+\begin{example}[Fortran Single Line Comment]
+\begin{minted}{fortran}
+! Initialize the counter
+integer :: counter = 0
+\end{minted}
+\end{example}
+
+\item \textbf{Docstrings}
+Fortran supports Doxygen-compatible comments to document modules, subroutines, and functions. These comments help clarify the purpose and usage of the code, making it easier for other developers to understand and use.
+\begin{example}[Fortran Docstring]
+\begin{minted}{fortran}
+!> @brief Computes the factorial of a number.
+!! 
+!! Calculates the factorial of a given integer n.
+!!
+!! @param n The integer whose factorial is to be computed.
+!! @return The factorial of n.
+integer function factorial(n)
+    integer, intent(in) :: n
+    integer :: i
+
+    factorial = 1
+    do i = 2, n
+        factorial = factorial * i
+    end do
+end function factorial
+\end{minted}
+\end{example}
+
+\item \textbf{Modules}: Use modules to encapsulate related procedures and data. This promotes reusability and cleaner code organization. Always declare the intent (in, out, inout) for subroutine arguments.
+
+\item \textbf{Subroutines and Functions}: 
+\begin{itemize}
+    \item Subroutines should perform a single, well-defined task.
+    \item Functions should be side-effect-free and used to return values.
+    \item Use implicit none in all subroutines, functions, and modules to prevent the use of undeclared variables.
+\end{itemize}
+
+\item \textbf{Precision}:
+\begin{example}[Fortran Types]
+\begin{minted}{fortran}
+integer, parameter :: dp = kind(1.0d0)
+real(dp) :: myVariable
+\end{minted}
+\end{example}
+\item \textbf{Error Handling}: Implement error handling in subroutines and functions, returning appropriate status codes and error messages.
+\end{itemize}
+\subsection{Python Style Standards}
+In general we will follow the \href{https://peps.python.org/pep-0008/}{PEP 8 style guide}
+\begin{itemize}
+\item \textbf{Indentation}: Use 4 spaces per indentation level. Do not use tabs.
+\item \textbf{Naming Conventions}:
+\begin{itemize}
+        \item \textit{Variables and Functions}: Use snake\_case for variables and function names (e.g., calculate\_sum).
+        \item \textit{Classes}: Use PascalCase for class names (e.g., DataProcessor).
+        \item \textit{Constants}: Use UPPER\_CASE with underscores for constants (e.g., MAX\_BUFFER\_SIZE).
+\end{itemize}
+\item \textbf{Comments and Docstrings}:
+\begin{itemize}
+        \item Use \# for single-line comments. Place comments on a new line above the code they describe.
+        \item Use triple double quotes (""" ... """) for docstrings in modules, classes, and functions. The first line of a docstring should be a short description, followed by a more detailed explanation if necessary.
+        \item We will use doxygen for python documentation despite the fact that Sphinx is generally more popular in python development environments. Given that we are already using Doxygen for C, C++, and Fortran documentation it makes sense to stick with it for python so that we have a consistent documentation system. Because of this, python functions, modules, and classes should use Doxygen style docstrings.
+\begin{example}[Example Docstring]
+\begin{minted}{python}
+def read_ester_model_as_pandas(path : str): -> "pd.DataFrame"
+"""
+@brief read an ester model as a dataframe.
+
+Given some path to a ester h5 model read it and return it as
+    a pandas dataframe
+
+@param path (str). Path to h5 file
+@return Dataframe representation of the ester model
+@raises FileNotFoundError if the path does not exist
+@raises EsterBadModelFileError If the h5 file is poorly
+        formatted
+
+@example
+>>> df = read_ester_model_as_pandas("M5.m5")
+"""
+\end{minted}
+\end{example}
+
+\end{itemize}
+\item \textbf{Imports}:
+\begin{itemize}
+        \item Group imports into three sections: standard library imports, third-party imports, and local imports. Separate each group with a blank line.
+        \item Use absolute imports instead of relative imports.
+        \item Import only what you need (e.g., from module import ClassName).
+\end{itemize}
+\item \textbf{Functions and Methods}:
+\begin{itemize}
+    \item Keep functions small and focused on a single task.
+    \item Use type hints for function arguments and return types (e.g., def add(a: int, b: int) -> int:).
+    \item Make \textbf{heavy} use of the typing module to hint at more complex return types such as Tuples or optional returns.
+    \item Use default arguments instead of overloading functions.
+\end{itemize}
+\item \textbf{Classes}:
+\begin{itemize}
+    \item Use class methods (@classmethod) and static methods (@staticmethod) where appropriate.
+    \item Use properties (@property) instead of getter and setter methods to provide a more Pythonic interface.
+\end{itemize}
+\item \textbf{Error Handling}:
+\begin{itemize}
+    \item Use exceptions for error handling. Catch specific exceptions rather than using a generic except clause.
+    \item Use built in exceptions as much as possible.
+    \item Raise custom exceptions only where more program specific information is actually useful.
+    \item Prefer explicit error catching to implicit error catching (i.e. as much as possible use conditional statements to check conditions and if they are not met raise error as opposed to try...except blocks)
+\end{itemize}
+
+\item \textbf{List Comprehensions and Generators}: 
+    Prefer list comprehensions and generator expressions for creating new lists or iterating over sequences.
+
+\begin{example}[List Comprehension]
+\begin{minted}{python}
+squares = [x**2 for x in range(10)]
+\end{minted}
+\end{example}
+
+\item \textbf{Testing}: Write unit tests for all functions and methods. Use pytest for running tests. Ensure that your tests cover a wide range of input scenarios, including edge cases.
+
+\item \textbf{Virtual Environments}:
+        Always use a virtual environment to manage dependencies for your project. This ensures that your project remains isolated and dependencies do not conflict with other projects.
+\begin{terminal}
+\begin{minted}{bash}
+$ python -m venv venv
+$ source venv/bin/activate
+\end{minted}
+\end{terminal}
+
+\item \textbf{Logging}: Use the logging module for logging information, rather than printing to stdout. This allows for better control over log output and is more suitable for production environments.
+\begin{example}[Logging Module]
+\begin{minted}{python}
+import logging
+from ester4d import get_logger
+
+logger = get_logger()
+
+logger.info("This is an info message")
+logger.error("This is an error message")
+logger.evolve("This is a custom level added for evolution info")
+\end{minted}
+\end{example}
+\item \textbf{Code Organization}:
+\begin{itemize}
+        \item Organize your code into modules and packages. Each module should have a clear purpose, and related modules should be grouped into packages.
+        \item Place unit tests in a tests/ directory at the root of the project, with a clear structure that mirrors the main codebase.
+\end{itemize}
+
+\end{itemize}
+
+\section{Testing Procedures and Standards}
+
+Effective testing is essential for ensuring the reliability, performance, and maintainability of the software developed within the 4D-ESTER project. This section outlines the proper testing procedures, standard tools to use for each language in the project, and additional testing considerations that should be integrated from the start.
+
+\subsection{General Testing Principles}
+
+Testing should be a fundamental part of the development process, not an afterthought. The following principles apply to all languages used in the project:
+
+\begin{itemize}
+    \item \textbf{Test Early and Often:} Begin writing tests as soon as development starts. Continuously integrate and run tests to catch issues early in the development cycle.
+    \item \textbf{Automate Testing:} Use automated testing tools and frameworks to run tests frequently and consistently, ideally with every commit or pull request.
+    \item \textbf{Test Coverage:} Aim for high test coverage, particularly for critical code paths. Ensure that both normal operation and edge cases are tested.
+    \item \textbf{Test Types:} Include a variety of test types, such as unit tests, integration tests, and system tests, to comprehensively assess the software.
+    \item \textbf{Continuous Integration (CI):} Integrate testing into the CI pipeline. Ensure that tests are run automatically for every commit, with results reported promptly to developers.
+\end{itemize}
+
+\subsection{C Testing Procedures and Tools}
+
+For C development, testing should be structured and automated using the following tools and techniques:
+
+\begin{itemize}
+    \item \textbf{Unit Testing:}
+    \begin{itemize}
+        \item Use \texttt{CMocka} or \texttt{Unity} for unit testing. These lightweight frameworks are designed for C and provide easy-to-use APIs for creating and running unit tests.
+        \item Structure tests to cover all functions, particularly those with complex logic. Ensure that edge cases and error conditions are tested.
+    \end{itemize}
+    
+    \item \textbf{Integration Testing:}
+    \begin{itemize}
+        \item Use \texttt{CTest}, the testing component of CMake, for integration testing. It allows you to organize and run a suite of tests and integrates well with other CMake-based projects.
+        \item Integration tests should focus on the interaction between different modules or components, ensuring that they work together as expected.
+    \end{itemize}
+    
+    \item \textbf{Static Analysis:}
+    \begin{itemize}
+        \item Employ \texttt{Cppcheck} and \texttt{Clang Static Analyzer} to perform static code analysis, identifying potential bugs, memory leaks, and undefined behaviors.
+        \item Incorporate static analysis into the CI pipeline to ensure that all commits are checked for common issues.
+    \end{itemize}
+    
+    \item \textbf{Code Coverage:}
+    \begin{itemize}
+        \item Use \texttt{gcov} in combination with \texttt{lcov} to measure test coverage. Aim for as close to 100\% coverage as feasible, focusing on critical code paths.
+        \item Integrate code coverage reports with the CI pipeline, providing visibility into areas of the codebase that may need more testing.
+    \end{itemize}
+\end{itemize}
+
+\subsection{C++ Testing Procedures and Tools}
+
+C++ shares many testing practices with C but offers additional tools and frameworks:
+
+\begin{itemize}
+    \item \textbf{Unit Testing:}
+    \begin{itemize}
+        \item Use \texttt{Google Test (gtest)} or \texttt{Catch2} for unit testing. Both frameworks are widely used in the C++ community and offer extensive features for writing and organizing tests.
+        \item Write unit tests to cover all classes and functions, ensuring that both expected and unexpected inputs are tested.
+    \end{itemize}
+    
+    \item \textbf{Integration Testing:}
+    \begin{itemize}
+        \item Use \texttt{CTest} in conjunction with CMake for running integration tests. This allows for seamless integration with other parts of the build system.
+        \item Focus on testing the interactions between different components, especially those involving complex inheritance or polymorphism.
+    \end{itemize}
+    
+    \item \textbf{Static Analysis:}
+    \begin{itemize}
+        \item Utilize \texttt{Cppcheck}, \texttt{Clang Static Analyzer}, and \texttt{SonarQube} for static code analysis. These tools help detect common issues, potential bugs, and performance bottlenecks.
+        \item Regularly run static analysis as part of the CI pipeline to catch issues early in the development process.
+    \end{itemize}
+    
+    \item \textbf{Code Coverage:}
+    \begin{itemize}
+        \item Use \texttt{gcov}, \texttt{lcov}, or \texttt{Codecov} for measuring code coverage. Ensure that tests cover all major code paths, especially in classes with complex logic.
+        \item Include coverage reports in the CI pipeline to monitor coverage trends and identify areas that need more testing.
+    \end{itemize}
+    
+    \item \textbf{Memory and Performance Profiling:}
+    \begin{itemize}
+        \item Use tools like \texttt{Valgrind} for memory profiling to detect memory leaks and errors. For performance profiling, consider using \texttt{gprof} or \texttt{perf}.
+        \item Integrate memory and performance profiling into the testing process, especially for performance-critical sections of code.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Fortran Testing Procedures and Tools}
+
+For Fortran, testing can be more challenging due to the language's older ecosystem, but there are effective tools available:
+
+\begin{itemize}
+    \item \textbf{Unit Testing:}
+    \begin{itemize}
+        \item Use \texttt{FortranTest} or \texttt{fUnit} for unit testing. These frameworks provide a structured way to write and run tests for Fortran code.
+        \item Focus on testing mathematical functions, array manipulations, and module interactions to ensure correctness and performance.
+    \end{itemize}
+    
+    \item \textbf{Integration Testing:}
+    \begin{itemize}
+        \item Integration tests should verify that different Fortran modules work together as expected. Given the scientific nature of most Fortran applications, focus on ensuring that numerical results are accurate and consistent.
+        \item Use custom scripts or tools like \texttt{CTest} (with CMake integration) to manage and run integration tests.
+    \end{itemize}
+    
+    \item \textbf{Static Analysis:}
+    \begin{itemize}
+        \item Use \texttt{Forcheck} or \texttt{Flint} for static analysis. These tools help identify potential issues in Fortran code, such as uninitialized variables and array bounds errors.
+        \item Static analysis should be part of the regular testing routine, especially for legacy code or when making significant changes.
+    \end{itemize}
+    
+    \item \textbf{Code Coverage:}
+    \begin{itemize}
+        \item Use tools like \texttt{GCOVR} to measure code coverage in Fortran programs. Strive to cover all critical code paths, particularly in modules that perform complex computations.
+        \item Integrate code coverage tools with CI pipelines to ensure that coverage levels are maintained as the project evolves.
+    \end{itemize}
+    
+    \item \textbf{Numerical Accuracy Testing:}
+    \begin{itemize}
+        \item Fortran is often used in numerical simulations and scientific computing, making numerical accuracy critical. Implement tests that compare computed results against known benchmarks or analytical solutions.
+        \item Consider using relative and absolute tolerance thresholds in tests to account for floating-point arithmetic precision.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Python Testing Procedures and Tools}
+
+Python is known for its strong testing culture and has a variety of tools available:
+
+\begin{itemize}
+    \item \textbf{Unit Testing:}
+    \begin{itemize}
+        \item Use \texttt{unittest} (built-in), \texttt{pytest}, or \texttt{nose2} for unit testing. \texttt{pytest} is particularly popular due to its simplicity and powerful features.
+        \item Write unit tests for all functions and methods, ensuring that edge cases and error conditions are thoroughly tested.
+    \end{itemize}
+    
+    \item \textbf{Integration Testing:}
+    \begin{itemize}
+        \item Integration tests should be written to verify that different modules and components work together as expected. Use \texttt{pytest} for its easy integration with fixtures and setup/teardown mechanisms.
+        \item Focus on testing the interactions between components, especially when dealing with external dependencies like databases or APIs.
+    \end{itemize}
+    
+    \item \textbf{Static Analysis:}
+    \begin{itemize}
+        \item Use \texttt{flake8}, \texttt{pylint}, or \texttt{mypy} for static code analysis. These tools help enforce coding standards, identify potential bugs, and ensure type correctness.
+        \item Integrate static analysis tools into the CI pipeline to ensure code quality is maintained across all commits.
+    \end{itemize}
+    
+    \item \textbf{Code Coverage:}
+    \begin{itemize}
+        \item Use \texttt{coverage.py} to measure test coverage. Aim for comprehensive coverage, particularly in modules with complex logic or critical functionality.
+        \item Include coverage reports in the CI pipeline and set coverage thresholds to ensure that new code does not decrease overall coverage.
+    \end{itemize}
+    
+    \item \textbf{Test Automation:}
+    \begin{itemize}
+        \item Use \texttt{tox} to automate testing across multiple Python versions and environments. \texttt{tox} ensures that the code runs consistently across different setups.
+        \item Integrate \texttt{tox} with CI systems to automate testing, linting, and coverage reporting in one streamlined process.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Other Testing Considerations}
+
+Beyond the tools and procedures specific to each language, there are additional considerations that should be integrated into the testing strategy from the start:
+
+\begin{itemize}
+    \item \textbf{Continuous Integration (CI):}
+    \begin{itemize}
+        \item Integrate all testing tools and procedures with GitHub Actions. The CI system should run all tests automatically on each commit or pull request, providing immediate feedback to developers. {\color{blue} Should we do this on every branch or just main?}
+        \item Ensure that the CI pipeline includes steps for static analysis, unit tests, integration tests, code coverage, and any other relevant checks.
+    \end{itemize}
+    
+    \item \textbf{Documentation of Tests:}
+    \begin{itemize}
+        \item Document the testing procedures for each module or component of 4D-ESTER. Include information on how to run tests, the expected outcomes, and how to interpret test results.
+        \item Ensure that test cases themselves are well-documented, including the purpose of each test, the input conditions, and the expected output.
+    \end{itemize}
+    
+    \item \textbf{Mocking and Stubbing:}
+    \begin{itemize}
+        \item Use mocking and stubbing techniques to isolate the code under test. This is particularly important in integration tests, where you may need to simulate the behavior of computationally expensive portions of the code base.
+        \item In Python, use libraries like \texttt{unittest.mock} or \texttt{pytest-mock}. In C/C++, use \texttt{Google Mock}.
+    \end{itemize}
+    
+    \item \textbf{Performance and Load Testing:}
+    \begin{itemize}
+        \item Regularly run performance tests to ensure that the application meets its performance requirements, especially after significant changes.
+        \item Build a profiling database which includes detailed information on the CPU and memory use of each commit hash.
+    \end{itemize}
+\end{itemize}    
+
+
+\end{document}
