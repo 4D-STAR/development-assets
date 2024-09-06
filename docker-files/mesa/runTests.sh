@@ -4,3 +4,4 @@ echo "Cloning libmesac from branch $BRANCH"
 git clone --branch $BRANCH https://github.com/4D-STAR/libmesac.git
 cd libmesac
 ./mk
+cp build/install/bin/test_results.xml ~/results
