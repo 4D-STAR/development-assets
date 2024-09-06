@@ -5,6 +5,7 @@ SRC=main.tex
 
 default: $(SRC)
 	$(TC) $(TFLAGS) $(SRC)
+	$(TC) $(TFLAGS) $(SRC)
 
 clean:
 	rm -f *.aux *.log *.out *.toc *.pdf *.bbl *.blg *.dvi *.ps *.bak
