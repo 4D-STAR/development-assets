@@ -1,0 +1,11 @@
+*.aux
+*.log
+*.out
+*.toc
+_minted-*
+._DS_Store
+.DS_Store
+__pycache__
+*.bbl
+*.blg
+*.synctex.gz
