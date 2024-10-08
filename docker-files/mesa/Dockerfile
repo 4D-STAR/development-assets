@@ -61,7 +61,9 @@ COPY --from=builder /home/mesauser/mesa-r24.03.1/data/chem_data /home/mesauser/m
 COPY --from=builder /home/mesauser/mesasdk /home/mesauser/mesasdk
 
 COPY runTests.sh /home/mesauser
-RUN chmod +x runTests.sh
+USER root
+RUN chmod a+x runTests.sh
+USER mesauser
 ENV MESA_DIR=/home/mesauser/mesa-r24.03.1
 ENV MESASDK_ROOT=/home/mesauser/mesasdk
 
